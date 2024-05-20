@@ -1,6 +1,5 @@
 import csv
 import io
-import os
 import sqlite3
 
 from flask import Flask, g, redirect, render_template, request, url_for
