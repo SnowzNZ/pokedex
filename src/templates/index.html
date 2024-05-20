@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pokedex</title>
+  </head>
+  <body>
+    <h1>pokedex</h1>
+    <form action="/upload" method="post" enctype="multipart/form-data">
+      <input type="file" id="csvFile" name="csvFile" accept=".csv" />
+      <input type="submit" value="Import CSV" name="submit" />
+    </form>
+    {% if pokemon %}
+    <table>
+      <tr>
+        {% for column in cur.description %} {% if column[0] != 'id' %}
+        <th>{{ column[0] }}</th>
+        {% endif %} {% endfor %}
+      </tr>
+
+      {% for pkm in pokemon %}
+      <tr id="{{ pkm[0] }}">
+        {% for value in pkm[1:] %}
+        <td contenteditable="false">{{ value }}</td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </table>
+    {% else %}
+    <p>No pokemon found.</p>
+    {% endif %}
+  </body>
+</html>
