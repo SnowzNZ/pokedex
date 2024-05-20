@@ -3,7 +3,6 @@ import io
 import sqlite3
 
 from flask import Flask, g, redirect, render_template, request, url_for
-from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 DATABASE_PATH = "db/pokemon.db"
@@ -121,7 +120,6 @@ def upload():
         if file.filename == "":
             return "No selected file"
         if file:
-            filename = secure_filename(file.filename)
             file_content = file.read().decode("utf8")
             import_csv(file_content)
             return redirect(url_for("index"))
