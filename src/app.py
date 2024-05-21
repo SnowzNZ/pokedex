@@ -105,8 +105,22 @@ def index():
     db = get_db()
     cur = db.cursor()
 
-    cur.execute("SELECT * FROM Pokemon")
+    cur.execute(
+        """
+        SELECT
+            Pokemon.*,
+            GROUP_CONCAT(Type.name) as types
+        FROM
+            Pokemon
+            INNER JOIN PokemonType ON Pokemon.id = PokemonType.pokemon_id
+            INNER JOIN Type ON PokemonType.type_id = Type.id
+        GROUP BY
+            Pokemon.id
+    """
+    )
     pokemon = cur.fetchall()
+
+    # columns = [desc[0] for desc in cur.description if desc[0] != "id"]
 
     return render_template("index.html", cur=cur, pokemon=pokemon)
 
