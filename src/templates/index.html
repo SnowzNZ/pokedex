@@ -4,12 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>pokedex</title>
+    <link rel="stylesheet" href="../static/style.css" />
   </head>
   <body>
-    <h1>pokedex</h1>
+    <h1>pokedex 🐛</h1>
     <form action="/upload" method="post" enctype="multipart/form-data">
       <input type="file" id="csvFile" name="csvFile" accept=".csv" />
-      <input type="submit" value="Import CSV" name="submit" />
+      <input type="submit" value="Import from CSV" name="submit" />
     </form>
     {% if pokemon %}
     <table>
@@ -28,7 +29,7 @@
       {% endfor %}
     </table>
     {% else %}
-    <p>No pokemon found.</p>
+    <p>No Pokemon data found! Maybe import some data from a CSV?</p>
     {% endif %}
   </body>
 </html>
