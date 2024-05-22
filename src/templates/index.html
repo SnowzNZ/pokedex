@@ -13,21 +13,30 @@
       <input type="submit" value="Import from CSV" name="submit" />
     </form>
     {% if pokemon %}
-    <table>
-      <tr>
-        {% for column in cur.description %} {% if column[0] != 'id' %}
-        <th>{{ column[0] }}</th>
-        {% endif %} {% endfor %}
-      </tr>
+    <div class="table">
+      <table>
+        <tr>
+          {% for column in cur.description %} {% if column[0] != 'id' %}
+          <th>{{ column[0] }}</th>
+          {% endif %} {% endfor %}
+        </tr>
 
-      {% for pkm in pokemon %}
-      <tr id="{{ pkm[0] }}">
-        {% for value in pkm[1:] %}
-        <td contenteditable="false">{{ value }}</td>
+        {% for pkm in pokemon %}
+        <tr id="{{ pkm[0] }}">
+          {% for value in pkm[1:] %}
+          <td contenteditable="false">{{ value }}</td>
+          {% endfor %}
+        </tr>
         {% endfor %}
-      </tr>
-      {% endfor %}
-    </table>
+      </table>
+      <div class="pagination">
+        <a href="{{ url_for('index', page=page-1) if page > 1 else '#' }}"
+          >Previous</a
+        >
+        <span>Page {{ page }}</span>
+        <a href="{{ url_for('index', page=page+1) }}">Next</a>
+      </div>
+    </div>
     {% else %}
     <p>No Pokemon data found! Maybe import some data from a CSV?</p>
     {% endif %}

@@ -105,6 +105,11 @@ def index():
     db = get_db()
     cur = db.cursor()
 
+    # Pagination
+    page = request.args.get(key="page", default=1, type=int)
+    per_page = 25
+    offset = (page - 1) * per_page
+
     cur.execute(
         """
         SELECT
@@ -116,13 +121,13 @@ def index():
             INNER JOIN Type ON PokemonType.type_id = Type.id
         GROUP BY
             Pokemon.id
-    """
+        LIMIT ? OFFSET ?
+    """,
+        (per_page, offset),
     )
     pokemon = cur.fetchall()
 
-    # columns = [desc[0] for desc in cur.description if desc[0] != "id"]
-
-    return render_template("index.html", cur=cur, pokemon=pokemon)
+    return render_template("index.html", cur=cur, pokemon=pokemon, page=page)
 
 
 @app.route("/upload", methods=["GET", "POST"])
