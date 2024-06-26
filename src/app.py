@@ -9,24 +9,31 @@ DATABASE_PATH = "db/pokemon.db"
 
 
 def get_db():
+    """
+    Connect to the SQLite database. If no connection exists in the current app context, create one.
+    """
     db = getattr(g, "_database", None)
     if db is None:
         db = g._database = sqlite3.connect(DATABASE_PATH)
-        db.row_factory = sqlite3.Row
-
+        db.row_factory = (
+            sqlite3.Row
+        )  # This allows row objects to be treated like dictionaries
     return db
 
 
 def init_db() -> None:
+    """
+    Initialize the database with the schema and populate initial data.
+    """
     with app.app_context():
         db = get_db()
-
         cur = db.cursor()
 
+        # Execute schema.sql script to create database tables
         with app.open_resource("../db/schema.sql") as f:
             cur.executescript(f.read().decode("utf8"))  # type: ignore
 
-        # Insert the Pokemon types into the Type table
+        # Insert initial Pokemon types into the Type table if it is empty
         cur.execute("SELECT COUNT(*) FROM Type")
         count = cur.fetchone()[0]
         if count == 0:
@@ -60,9 +67,11 @@ def init_db() -> None:
 
 
 def import_csv(file: str) -> None:
+    """
+    Import Pokemon data from a CSV file and insert it into the database.
+    """
     with app.app_context():
         db = get_db()
-
         cur = db.cursor()
 
         csvfile = io.StringIO(file)
@@ -120,6 +129,9 @@ def import_csv(file: str) -> None:
 
 @app.route("/")
 def index():
+    """
+    Render the main page displaying a list of Pokemon with pagination.
+    """
     db = get_db()
     cur = db.cursor()
 
@@ -150,6 +162,9 @@ def index():
 
 @app.route("/upload", methods=["GET", "POST"])
 def upload():
+    """
+    Handle file upload and import CSV data into the database.
+    """
     if request.method == "POST":
         if "csvFile" not in request.files:
             return "No file part"
@@ -165,6 +180,9 @@ def upload():
 
 @app.teardown_appcontext
 def close_connection(exception):
+    """
+    Close the database connection at the end of the request.
+    """
     db = getattr(g, "_database", None)
     if db is not None:
         db.close()
@@ -172,6 +190,6 @@ def close_connection(exception):
 
 if __name__ == "__main__":
     with app.app_context():
-        init_db()
+        init_db()  # Initialize the database if the script is run directly
 
-    app.run(debug=True)
+    app.run(debug=True)  # Run the Flask app in debug mode
