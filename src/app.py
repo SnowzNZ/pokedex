@@ -68,35 +68,53 @@ def import_csv(file: str) -> None:
         csvfile = io.StringIO(file)
         reader = csv.DictReader(csvfile)
         for row in reader:
+            # Check if the Pokemon already exists in the database
             cur.execute(
                 """
-                INSERT INTO Pokemon (pokemon_id, name, form, hp, attack, defense, special_attack, special_defense, speed, generation_id)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                SELECT * FROM Pokemon WHERE pokemon_id = ?
             """,
-                (
-                    row["Number"],
-                    row["Name"],
-                    row["Form"],
-                    row["HP"],
-                    row["Attack"],
-                    row["Defense"],
-                    row["Sp.Attack"],
-                    row["Sp.Defense"],
-                    row["Speed"],
-                    row["Generation"],
-                ),
+                (row["Number"],),
             )
+            if cur.fetchone() is None:
+                # If the Pokemon does not exist, insert it
+                cur.execute(
+                    """
+                    INSERT INTO Pokemon (pokemon_id, name, form, hp, attack, defense, special_attack, special_defense, speed, generation_id)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                    (
+                        row["Number"],
+                        row["Name"],
+                        row["Form"],
+                        row["HP"],
+                        row["Attack"],
+                        row["Defense"],
+                        row["Sp.Attack"],
+                        row["Sp.Defense"],
+                        row["Speed"],
+                        row["Generation"],
+                    ),
+                )
 
-            types = (row["Type 1"], row["Type 2"])
-            for type in types:
-                if type and type.strip():
-                    cur.execute(
-                        """
-                        INSERT INTO PokemonType (pokemon_id, type_id)
-                        VALUES (?, (SELECT id FROM Type WHERE name = ?))
-                    """,
-                        (cur.lastrowid, type),
-                    )
+                types = (row["Type 1"], row["Type 2"])
+                for type in types:
+                    if type and type.strip():
+                        # Check if the PokemonType already exists in the database
+                        cur.execute(
+                            """
+                            SELECT * FROM PokemonType WHERE pokemon_id = ? AND type_id = (SELECT id FROM Type WHERE name = ?)
+                            """,
+                            (cur.lastrowid, type),
+                        )
+                        if cur.fetchone() is None:
+                            # If the PokemonType does not exist, insert it
+                            cur.execute(
+                                """
+                                INSERT INTO PokemonType (pokemon_id, type_id)
+                                VALUES (?, (SELECT id FROM Type WHERE name = ?))
+                                """,
+                                (cur.lastrowid, type),
+                            )
         db.commit()
 
 
