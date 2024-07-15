@@ -12,22 +12,27 @@
       <input type="file" id="csvFile" name="csvFile" accept=".csv" />
       <input type="submit" value="Import from CSV" name="submit" />
     </form>
-    {% if pokemon %}
-    <div class="table">
-      <table>
-        <tr>
-          {% for column in cur.description %} {% if column[0] != 'id' %}
-          <th>{{ column[0] }}</th>
-          {% endif %} {% endfor %}
-        </tr>
 
-        {% for pkm in pokemon %}
-        <tr id="{{ pkm[0] }}">
-          {% for value in pkm[1:] %}
-          <td contenteditable="false">{{ value }}</td>
+    <input type="text" id="searchBar" placeholder="Search for Pokémon..." />
+
+    <div class="table">
+      <table id="pokemonTable">
+        <thead>
+          <tr>
+            {% for column in cur.description %} {% if column[0] != 'id' %}
+            <th>{{ column[0] }}</th>
+            {% endif %} {% endfor %}
+          </tr>
+        </thead>
+        <tbody id="pokemonTableBody">
+          {% for pkm in pokemon %}
+          <tr id="{{ pkm[0] }}">
+            {% for value in pkm[1:] %}
+            <td contenteditable="false">{{ value }}</td>
+            {% endfor %}
+          </tr>
           {% endfor %}
-        </tr>
-        {% endfor %}
+        </tbody>
       </table>
       <div class="pagination">
         <a href="{{ url_for('index', page=page-1) if page > 1 else '#' }}"
@@ -37,8 +42,32 @@
         <a href="{{ url_for('index', page=page+1) }}">Next</a>
       </div>
     </div>
-    {% else %}
+
+    {% if not pokemon %}
     <p>No Pokemon data found! Maybe import some data from a CSV?</p>
     {% endif %}
+
+    <script>
+      const searchBar = document.getElementById('searchBar');
+      const pokemonTableBody = document.getElementById('pokemonTableBody');
+      const columns = [{% for column in cur.description %}{% if column[0] != 'id' %}"{{ column[0] }}",{% endif %}{% endfor %}];
+
+      searchBar.addEventListener('input', async () => {
+        const query = searchBar.value;
+        const response = await fetch(`/search?query=${query}`);
+        const results = await response.json();
+
+        pokemonTableBody.innerHTML = '';
+        results.forEach(pokemon => {
+          const row = document.createElement('tr');
+          columns.forEach(column => {
+            const cell = document.createElement('td');
+            cell.textContent = pokemon[column];
+            row.appendChild(cell);
+          });
+          pokemonTableBody.appendChild(row);
+        });
+      });
+    </script>
   </body>
 </html>

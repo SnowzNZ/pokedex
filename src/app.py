@@ -2,7 +2,7 @@ import csv
 import io
 import sqlite3
 
-from flask import Flask, g, redirect, render_template, request, url_for
+from flask import Flask, g, jsonify, redirect, render_template, request, url_for
 
 app = Flask(__name__)
 DATABASE_PATH = "db/pokemon.db"
@@ -176,6 +176,20 @@ def upload():
             import_csv(file_content)
             return redirect(url_for("index"))
     return redirect(url_for("index"))
+
+
+@app.route("/search", methods=["GET"])
+def search():
+    query = request.args.get("query", "")
+
+    db = get_db()
+    cur = db.cursor()
+
+    cur.execute("SELECT * FROM pokemon WHERE name LIKE ?", ("%" + query + "%",))
+    rows = cur.fetchall()
+
+    results = [dict(row) for row in rows]
+    return jsonify(results)
 
 
 @app.teardown_appcontext
