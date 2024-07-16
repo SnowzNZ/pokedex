@@ -34,7 +34,7 @@
           {% endfor %}
         </tbody>
       </table>
-      <div class="pagination">
+      <div class="pagination" id="searchPagination">
         <a href="{{ url_for('index', page=page-1) if page > 1 else '#' }}"
           >Previous</a
         >
@@ -44,21 +44,25 @@
     </div>
 
     {% if not pokemon %}
-    <p>No Pokemon data found! Maybe import some data from a CSV?</p>
+    <p>No Pokemon found! Maybe import some data from a CSV?</p>
     {% endif %}
 
     <script>
       const searchBar = document.getElementById('searchBar');
       const pokemonTableBody = document.getElementById('pokemonTableBody');
+      const searchPagination = document.getElementById('searchPagination');
       const columns = [{% for column in cur.description %}{% if column[0] != 'id' %}"{{ column[0] }}",{% endif %}{% endfor %}];
+      let currentPage = 1;
 
-      searchBar.addEventListener('input', async () => {
-        const query = searchBar.value;
-        const response = await fetch(`/search?query=${query}`);
+      async function fetchResults(query, page = 1) {
+        const response = await fetch(`/search?query=${query}&page=${page}`);
         const results = await response.json();
+        return results;
+      }
 
+      function renderTable(data) {
         pokemonTableBody.innerHTML = '';
-        results.forEach(pokemon => {
+        data.forEach(pokemon => {
           const row = document.createElement('tr');
           columns.forEach(column => {
             const cell = document.createElement('td');
@@ -67,6 +71,45 @@
           });
           pokemonTableBody.appendChild(row);
         });
+      }
+
+      function renderPagination(query, page) {
+        searchPagination.innerHTML = '';
+        const prevPage = document.createElement('a');
+        prevPage.href = '#';
+        prevPage.textContent = 'Previous';
+        prevPage.onclick = () => {
+          if (page > 1) {
+            currentPage--;
+            updateSearch(query, currentPage);
+          }
+        };
+        searchPagination.appendChild(prevPage);
+
+        const pageSpan = document.createElement('span');
+        pageSpan.textContent = `Page ${page}`;
+        searchPagination.appendChild(pageSpan);
+
+        const nextPage = document.createElement('a');
+        nextPage.href = '#';
+        nextPage.textContent = 'Next';
+        nextPage.onclick = () => {
+          currentPage++;
+          updateSearch(query, currentPage);
+        };
+        searchPagination.appendChild(nextPage);
+      }
+
+      async function updateSearch(query, page = 1) {
+        const results = await fetchResults(query, page);
+        renderTable(results);
+        renderPagination(query, page);
+      }
+
+      searchBar.addEventListener('input', () => {
+        const query = searchBar.value;
+        currentPage = 1;
+        updateSearch(query, currentPage);
       });
     </script>
   </body>

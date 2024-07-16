@@ -181,11 +181,30 @@ def upload():
 @app.route("/search", methods=["GET"])
 def search():
     query = request.args.get("query", "")
+    page = request.args.get(key="page", default=1, type=int)
+    per_page = 25
+    offset = (page - 1) * per_page
 
     db = get_db()
     cur = db.cursor()
 
-    cur.execute("SELECT * FROM pokemon WHERE name LIKE ?", ("%" + query + "%",))
+    cur.execute(
+        """
+        SELECT
+            Pokemon.*,
+            GROUP_CONCAT(Type.name) as types
+        FROM
+            Pokemon
+            INNER JOIN PokemonType ON Pokemon.id = PokemonType.pokemon_id
+            INNER JOIN Type ON PokemonType.type_id = Type.id
+        WHERE
+            Pokemon.name LIKE ?
+        GROUP BY
+            Pokemon.id
+        LIMIT ? OFFSET ?
+    """,
+        ("%" + query + "%", per_page, offset),
+    )
     rows = cur.fetchall()
 
     results = [dict(row) for row in rows]
