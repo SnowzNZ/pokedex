@@ -16,13 +16,44 @@
     <input type="text" id="searchBar" placeholder="Search for Pokémon..." />
 
     <!-- Insert Button -->
-    <button id="insertButton">Insert</button>
+    <button id="insertButton">Insert New Pokemon</button>
 
     <!-- Insert Modal -->
     <div id="insertModal" class="modal">
       <div class="modal-content">
         <span class="close">&times;</span>
         <p>Example</p>
+        <form id="manualInsertForm">
+          <label for="number">Number:</label>
+          <input type="text" id="number" name="number" /><br />
+          <label for="name">Name:</label>
+          <input type="text" id="name" name="name" /><br />
+          <label for="form">Form:</label>
+          <input type="text" id="form" name="form" /><br />
+          <label for="hp">HP:</label>
+          <input type="text" id="hp" name="hp" /><br />
+          <label for="attack">Attack:</label>
+          <input type="text" id="attack" name="attack" /><br />
+          <label for="defense">Defense:</label>
+          <input type="text" id="defense" name="defense" /><br />
+          <label for="special_attack">Special Attack:</label>
+          <input type="text" id="special_attack" name="special_attack" /><br />
+          <label for="special_defense">Special Defense:</label>
+          <input
+            type="text"
+            id="special_defense"
+            name="special_defense"
+          /><br />
+          <label for="speed">Speed:</label>
+          <input type="text" id="speed" name="speed" /><br />
+          <label for="generation">Generation:</label>
+          <input type="text" id="generation" name="generation" /><br />
+          <label for="type1">Type 1:</label>
+          <input type="text" id="type1" name="type1" /><br />
+          <label for="type2">Type 2:</label>
+          <input type="text" id="type2" name="type2" /><br />
+          <button type="submit">Submit</button>
+        </form>
       </div>
     </div>
 
@@ -148,6 +179,26 @@
           modal.style.display = "none";
         }
       };
+
+      // Handle form submission
+      const manualInsertForm = document.getElementById('manualInsertForm');
+      manualInsertForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(manualInsertForm);
+        const data = Object.fromEntries(formData);
+        const response = await fetch('/insert', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        });
+        if (response.ok) {
+          insertForm.style.display = 'none';
+          manualInsertForm.reset();
+          updateSearch(searchBar.value, currentPage);
+        }
+      });
     </script>
   </body>
 </html>

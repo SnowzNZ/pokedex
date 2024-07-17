@@ -211,6 +211,49 @@ def search():
     return jsonify(results)
 
 
+@app.route("/insert", methods=["POST"])
+def insert():
+    data = request.get_json()
+    db = get_db()
+    cur = db.cursor()
+
+    # Insert new Pokémon
+    cur.execute(
+        """
+        INSERT INTO Pokemon (pokemon_id, name, form, hp, attack, defense, special_attack, special_defense, speed, generation_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """,
+        (
+            data["number"],
+            data["name"],
+            data["form"],
+            data["hp"],
+            data["attack"],
+            data["defense"],
+            data["special_attack"],
+            data["special_defense"],
+            data["speed"],
+            data["generation"],
+        ),
+    )
+    pokemon_id = cur.lastrowid
+
+    # Insert Pokémon types
+    types = (data["type1"], data["type2"])
+    for type in types:
+        if type and type.strip():
+            cur.execute(
+                """
+                INSERT INTO PokemonType (pokemon_id, type_id)
+                VALUES (?, (SELECT id FROM Type WHERE name = ?))
+                """,
+                (pokemon_id, type),
+            )
+
+    db.commit()
+    return jsonify({"status": "success"})
+
+
 @app.teardown_appcontext
 def close_connection(exception):
     """
