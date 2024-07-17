@@ -15,6 +15,17 @@
 
     <input type="text" id="searchBar" placeholder="Search for Pokémon..." />
 
+    <!-- Insert Button -->
+    <button id="insertButton">Insert</button>
+
+    <!-- Insert Modal -->
+    <div id="insertModal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <p>Example</p>
+      </div>
+    </div>
+
     <div class="table">
       <table id="pokemonTable">
         <thead>
@@ -111,6 +122,32 @@
         currentPage = 1;
         updateSearch(query, currentPage);
       });
+
+      // Get the modal
+      var modal = document.getElementById("insertModal");
+
+      // Get the button that opens the modal
+      var btn = document.getElementById("insertButton");
+
+      // Get the <span> element that closes the modal
+      var span = document.getElementsByClassName("close")[0];
+
+      // When the user clicks the button, open the modal
+      btn.onclick = function () {
+        modal.style.display = "block";
+      };
+
+      // When the user clicks on <span> (x), close the modal
+      span.onclick = function () {
+        modal.style.display = "none";
+      };
+
+      // When the user clicks anywhere outside of the modal, close it
+      window.onclick = function (event) {
+        if (event.target == modal) {
+          modal.style.display = "none";
+        }
+      };
     </script>
   </body>
 </html>
