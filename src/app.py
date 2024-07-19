@@ -31,7 +31,7 @@ def init_db() -> None:
 
         # Execute schema.sql script to create database tables
         with app.open_resource("../db/schema.sql") as f:
-            cur.executescript(f.read().decode("utf8"))
+            cur.executescript(f.read().decode("utf8"))  # type: ignore
 
         # Insert initial Pokemon types into the Type table if it is empty
         cur.execute("SELECT COUNT(*) FROM Type")
@@ -180,9 +180,6 @@ def upload():
 
 @app.route("/search", methods=["GET"])
 def search():
-    """
-    Search for Pokemon by name and return the results as JSON.
-    """
     query = request.args.get("query", "")
     page = request.args.get(key="page", default=1, type=int)
     per_page = 25
@@ -216,9 +213,6 @@ def search():
 
 @app.route("/insert", methods=["POST"])
 def insert():
-    """
-    Insert a new Pokemon into the database.
-    """
     data = request.get_json()
     db = get_db()
     cur = db.cursor()
