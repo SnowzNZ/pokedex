@@ -31,7 +31,7 @@ def init_db() -> None:
 
         # Execute schema.sql script to create database tables
         with app.open_resource("../db/schema.sql") as f:
-            cur.executescript(f.read().decode("utf8"))  # type: ignore
+            cur.executescript(f.read().decode("utf8"))
 
         # Insert initial Pokemon types into the Type table if it is empty
         cur.execute("SELECT COUNT(*) FROM Type")
@@ -80,12 +80,23 @@ def import_csv(file: str) -> None:
             # Check if the Pokemon already exists in the database
             cur.execute(
                 """
-                SELECT * FROM Pokemon WHERE pokemon_id = ?
-            """,
-                (row["Number"],),
+                SELECT * FROM Pokemon WHERE pokemon_id = ? AND name = ? AND form = ? AND hp = ? AND attack = ? AND defense = ? AND special_attack = ? AND special_defense = ? AND speed = ? AND generation_id = ?
+                """,
+                (
+                    row["Number"],
+                    row["Name"],
+                    row["Form"],
+                    row["HP"],
+                    row["Attack"],
+                    row["Defense"],
+                    row["Sp.Attack"],
+                    row["Sp.Defense"],
+                    row["Speed"],
+                    row["Generation"],
+                ),
             )
             if cur.fetchone() is None:
-                # If the Pokemon does not exist, insert it
+                # If the Pokemon does not exist with the exact same details, insert it
                 cur.execute(
                     """
                     INSERT INTO Pokemon (pokemon_id, name, form, hp, attack, defense, special_attack, special_defense, speed, generation_id)
@@ -180,6 +191,9 @@ def upload():
 
 @app.route("/search", methods=["GET"])
 def search():
+    """
+    Search for Pokemon by name and return the results as JSON.
+    """
     query = request.args.get("query", "")
     page = request.args.get(key="page", default=1, type=int)
     per_page = 25
@@ -252,6 +266,51 @@ def insert():
 
     db.commit()
     return jsonify({"status": "success"})
+
+
+@app.route("/filter")
+def filter():
+    # List of allowed attributes for filtering
+    allowed_filters = [
+        "hp",
+        "attack",
+        "defense",
+        "special_attack",
+        "special_defense",
+        "speed",
+        "generation_id",
+    ]
+    filters = []
+
+    # Build the WHERE clause based on provided query parameters
+    for attr in allowed_filters:
+        min_val = request.args.get(f"min_{attr}")
+        max_val = request.args.get(f"max_{attr}")
+        if min_val:
+            filters.append(f"{attr} >= {min_val}")
+        if max_val:
+            filters.append(f"{attr} <= {max_val}")
+
+    where_clause = (
+        " AND ".join(filters) if filters else "1=1"
+    )  # Default to true if no filters
+
+    # Execute the query
+    db = get_db()
+    cur = db.cursor()
+    cur.execute(
+        f"""
+        SELECT * FROM Pokemon
+        WHERE {where_clause}
+    """
+    )
+    rows = cur.fetchall()
+
+    # Convert rows to a list of dicts to jsonify
+    columns = [column[0] for column in cur.description]
+    results = [dict(zip(columns, row)) for row in rows]
+
+    return jsonify(results)
 
 
 @app.teardown_appcontext

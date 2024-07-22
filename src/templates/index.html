@@ -15,6 +15,150 @@
 
     <input type="text" id="searchBar" placeholder="Search for Pokémon..." />
 
+    <!-- Range boxes -->
+    <div class="filters">
+      <div class="filter-group">
+        <label for="hpMin">HP:</label>
+        <input
+          type="number"
+          id="hpMin"
+          name="hpMin"
+          min="0"
+          max="255"
+          value="0"
+        />
+        <span> - </span>
+        <input
+          type="number"
+          id="hpMax"
+          name="hpMax"
+          min="0"
+          max="255"
+          value="255"
+        />
+      </div>
+      <div class="filter-group">
+        <label for="attackMin">Attack:</label>
+        <input
+          type="number"
+          id="attackMin"
+          name="attackMin"
+          min="0"
+          max="255"
+          value="0"
+        />
+        <span> - </span>
+        <input
+          type="number"
+          id="attackMax"
+          name="attackMax"
+          min="0"
+          max="255"
+          value="255"
+        />
+      </div>
+      <div class="filter-group">
+        <label for="defenseMin">Defense:</label>
+        <input
+          type="number"
+          id="defenseMin"
+          name="defenseMin"
+          min="0"
+          max="255"
+          value="0"
+        />
+        <span> - </span>
+        <input
+          type="number"
+          id="defenseMax"
+          name="defenseMax"
+          min="0"
+          max="255"
+          value="255"
+        />
+      </div>
+      <div class="filter-group">
+        <label for="specialAttackMin">Special Attack:</label>
+        <input
+          type="number"
+          id="specialAttackMin"
+          name="specialAttackMin"
+          min="0"
+          max="255"
+          value="0"
+        />
+        <span> - </span>
+        <input
+          type="number"
+          id="specialAttackMax"
+          name="specialAttackMax"
+          min="0"
+          max="255"
+          value="255"
+        />
+      </div>
+      <div class="filter-group">
+        <label for="specialDefenseMin">Special Defense:</label>
+        <input
+          type="number"
+          id="specialDefenseMin"
+          name="specialDefenseMin"
+          min="0"
+          max="255"
+          value="0"
+        />
+        <span> - </span>
+        <input
+          type="number"
+          id="specialDefenseMax"
+          name="specialDefenseMax"
+          min="0"
+          max="255"
+          value="255"
+        />
+      </div>
+      <div class="filter-group">
+        <label for="speedMin">Speed:</label>
+        <input
+          type="number"
+          id="speedMin"
+          name="speedMin"
+          min="0"
+          max="255"
+          value="0"
+        />
+        <span> - </span>
+        <input
+          type="number"
+          id="speedMax"
+          name="speedMax"
+          min="0"
+          max="255"
+          value="255"
+        />
+      </div>
+      <div class="filter-group">
+        <label for="generationMin">Generation:</label>
+        <input
+          type="number"
+          id="generationMin"
+          name="generationMin"
+          min="0"
+          max="255"
+          value="0"
+        />
+        <span> - </span>
+        <input
+          type="number"
+          id="generationMax"
+          name="generationMax"
+          min="0"
+          max="10"
+          value="10"
+        />
+      </div>
+    </div>
+
     <!-- Insert Button -->
     <button id="insertButton">Insert New Pokemon</button>
 
@@ -22,7 +166,7 @@
     <div id="insertModal" class="modal">
       <div class="modal-content">
         <span class="close">&times;</span>
-        <p>Example</p>
+
         <form id="manualInsertForm">
           <label for="number">Number:</label>
           <input type="text" id="number" name="number" /><br />
@@ -96,11 +240,46 @@
       const columns = [{% for column in cur.description %}{% if column[0] != 'id' %}"{{ column[0] }}",{% endif %}{% endfor %}];
       let currentPage = 1;
 
-      async function fetchResults(query, page = 1) {
-        const response = await fetch(`/search?query=${query}&page=${page}`);
-        const results = await response.json();
-        return results;
+      function openEditModal(pokemon) {
+        // Fill
+        document.getElementById('number').value = pokemon.pokemon_id;
+        document.getElementById('name').value = pokemon.name;
+        document.getElementById('form').value = pokemon.form;
+        document.getElementById('hp').value = pokemon.hp;
+        document.getElementById('attack').value = pokemon.attack;
+        document.getElementById('defense').value = pokemon.defense;
+        document.getElementById('special_attack').value = pokemon.special_attack;
+        document.getElementById('special_defense').value = pokemon.special_defense;
+        document.getElementById('speed').value = pokemon.speed;
+        document.getElementById('generation').value = pokemon.generation_id;
+        // TODO: show types in the form
+        document.getElementById('type1').value = "";
+        document.getElementById('type2').value = "";
+
+        document.getElementById('insertModal').style.display = 'block';
+        var modal = document.getElementById("insertModal");
+
+        // Get the <span> element that closes the modal
+        var span = document.getElementsByClassName("close")[0];
+
+        // When the user clicks the button, open the modal
+        btn.onclick = function () {
+          modal.style.display = "block";
+        }
+
+        // When the user clicks on <span> (x), close the modal
+        span.onclick = function () {
+          modal.style.display = "none";
+        }
+
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function (event) {
+          if (event.target == modal) {
+            modal.style.display = "none";
+          }
+        }
       }
+
 
       function renderTable(data) {
         pokemonTableBody.innerHTML = '';
@@ -111,6 +290,15 @@
             cell.textContent = pokemon[column];
             row.appendChild(cell);
           });
+
+          // Edit button
+          const editCell = document.createElement('td');
+          const editButton = document.createElement('button');
+          editButton.textContent = 'Edit';
+          editButton.onclick = () => openEditModal(pokemon);
+          editCell.appendChild(editButton);
+          row.appendChild(editCell);
+
           pokemonTableBody.appendChild(row);
         });
       }
@@ -199,6 +387,69 @@
           updateSearch(searchBar.value, currentPage);
         }
       });
+
+      const hpMinInput = document.getElementById('hpMin');
+      const hpMaxInput = document.getElementById('hpMax');
+      const attackMinInput = document.getElementById('attackMin');
+      const attackMaxInput = document.getElementById('attackMax');
+      const defenseMinInput = document.getElementById('defenseMin');
+      const defenseMaxInput = document.getElementById('defenseMax');
+      const specialAttackMinInput = document.getElementById('specialAttackMin');
+      const specialAttackMaxInput = document.getElementById('specialAttackMax');
+      const specialDefenseMinInput = document.getElementById('specialDefenseMin');
+      const specialDefenseMaxInput = document.getElementById('specialDefenseMax');
+      const speedMinInput = document.getElementById('speedMin');
+      const speedMaxInput = document.getElementById('speedMax');
+      const generationMinInput = document.getElementById('generationMin');
+      const generationMaxInput = document.getElementById('generationMax');
+
+      async function updateSearch() {
+        const hpMin = hpMinInput.value;
+        const hpMax = hpMaxInput.value;
+        const attackMin = attackMinInput.value;
+        const attackMax = attackMaxInput.value;
+        const defenseMin = defenseMinInput.value;
+        const defenseMax = defenseMaxInput.value;
+        const specialAttackMin = specialAttackMinInput.value;
+        const specialAttackMax = specialAttackMaxInput.value;
+        const specialDefenseMin = specialDefenseMinInput.value;
+        const specialDefenseMax = specialDefenseMaxInput.value;
+        const speedMin = speedMinInput.value;
+        const speedMax = speedMaxInput.value;
+        const generationMin = generationMinInput.value;
+        const generationMax = generationMaxInput.value;
+
+        const query = searchBar.value;
+
+        const response = await fetch(`/filter?min_hp=${hpMin}&max_hp=${hpMax}&min_attack=${attackMin}&max_attack=${attackMax}&min_defense=${defenseMin}&max_defense=${defenseMax}&min_special_attack=${specialAttackMin}&max_special_attack=${specialAttackMax}&min_special_defense=${specialDefenseMin}&max_special_defense=${specialDefenseMax}&min_speed=${speedMin}&max_speed=${speedMax}&min_generation_id=${generationMin}&max_generation_id=${generationMax}&query=${query}`);
+        if (response.ok) {
+          const results = await response.json();
+          renderTable(results);
+          renderPagination(query, currentPage);
+        } else {
+          console.error('Failed to fetch results');
+        }
+      }
+      // Function to call updateSearch whenever an input field changes
+      function addInputEventListeners() {
+        hpMinInput.addEventListener('input', updateSearch);
+        hpMaxInput.addEventListener('input', updateSearch);
+        attackMinInput.addEventListener('input', updateSearch);
+        attackMaxInput.addEventListener('input', updateSearch);
+        defenseMinInput.addEventListener('input', updateSearch);
+        defenseMaxInput.addEventListener('input', updateSearch);
+        specialAttackMinInput.addEventListener('input', updateSearch);
+        specialAttackMaxInput.addEventListener('input', updateSearch);
+        specialDefenseMinInput.addEventListener('input', updateSearch);
+        specialDefenseMaxInput.addEventListener('input', updateSearch);
+        speedMinInput.addEventListener('input', updateSearch);
+        speedMaxInput.addEventListener('input', updateSearch);
+        generationMinInput.addEventListener('input', updateSearch);
+        generationMaxInput.addEventListener('input', updateSearch);
+      }
+
+      // Initialize event listeners
+      addInputEventListeners();
     </script>
   </body>
 </html>
