@@ -189,21 +189,42 @@ def upload():
     return redirect(url_for("index"))
 
 
-@app.route("/search", methods=["GET"])
-def search():
+@app.route("/query", methods=["GET"])
+def query():
     """
-    Search for Pokemon by name and return the results as JSON.
+    Search and filter Pokemon by name and attributes, return results as JSON.
     """
-    query = request.args.get("query", "")
+    name = request.args.get("name", "")
     page = request.args.get(key="page", default=1, type=int)
     per_page = 25
     offset = (page - 1) * per_page
+
+    filters = []
+    allowed_filters = [
+        "hp",
+        "attack",
+        "defense",
+        "special_attack",
+        "special_defense",
+        "speed",
+        "generation_id",
+    ]
+
+    for attr in allowed_filters:
+        min_val = request.args.get(f"min_{attr}")
+        max_val = request.args.get(f"max_{attr}")
+        if min_val:
+            filters.append(f"{attr} >= {min_val}")
+        if max_val:
+            filters.append(f"{attr} <= {max_val}")
+
+    filter_clause = " AND ".join(filters) if filters else "1=1"
 
     db = get_db()
     cur = db.cursor()
 
     cur.execute(
-        """
+        f"""
         SELECT
             Pokemon.*,
             GROUP_CONCAT(Type.name) as types
@@ -212,12 +233,12 @@ def search():
             INNER JOIN PokemonType ON Pokemon.id = PokemonType.pokemon_id
             INNER JOIN Type ON PokemonType.type_id = Type.id
         WHERE
-            Pokemon.name LIKE ?
+            Pokemon.name LIKE ? AND {filter_clause}
         GROUP BY
             Pokemon.id
         LIMIT ? OFFSET ?
     """,
-        ("%" + query + "%", per_page, offset),
+        ("%" + name + "%", per_page, offset),
     )
     rows = cur.fetchall()
 

@@ -331,15 +331,43 @@
       }
 
       async function updateSearch(query, page = 1) {
-        const results = await fetchResults(query, page);
-        renderTable(results);
-        renderPagination(query, page);
+          const filterParams = new URLSearchParams();
+          filterParams.append('query', query);
+          filterParams.append('page', page);
+          filterParams.append('min_hp', document.getElementById('hpMin').value);
+          filterParams.append('max_hp', document.getElementById('hpMax').value);
+          filterParams.append('min_attack', document.getElementById('attackMin').value);
+          filterParams.append('max_attack', document.getElementById('attackMax').value);
+          filterParams.append('min_defense', document.getElementById('defenseMin').value);
+          filterParams.append('max_defense', document.getElementById('defenseMax').value);
+          filterParams.append('min_special_attack', document.getElementById('specialAttackMin').value);
+          filterParams.append('max_special_attack', document.getElementById('specialAttackMax').value);
+          filterParams.append('min_special_defense', document.getElementById('specialDefenseMin').value);
+          filterParams.append('max_special_defense', document.getElementById('specialDefenseMax').value);
+          filterParams.append('min_speed', document.getElementById('speedMin').value);
+          filterParams.append('max_speed', document.getElementById('speedMax').value);
+          filterParams.append('min_generation', document.getElementById('generationMin').value);
+          filterParams.append('max_generation', document.getElementById('generationMax').value);
+
+          const response = await fetch(`/search?${filterParams.toString()}`);
+          const results = await response.json();
+          renderTable(results);
+          renderPagination(query, page);
       }
 
       searchBar.addEventListener('input', () => {
-        const query = searchBar.value;
-        currentPage = 1;
-        updateSearch(query, currentPage);
+          const query = searchBar.value;
+          currentPage = 1;
+          updateSearch(query, currentPage);
+      });
+
+      // Add event listeners to filter inputs to trigger search
+      document.querySelectorAll('.filters input').forEach(input => {
+          input.addEventListener('change', () => {
+              const query = searchBar.value;
+              currentPage = 1;
+              updateSearch(query, currentPage);
+          });
       });
 
       // Get the modal
@@ -421,7 +449,7 @@
 
         const query = searchBar.value;
 
-        const response = await fetch(`/filter?min_hp=${hpMin}&max_hp=${hpMax}&min_attack=${attackMin}&max_attack=${attackMax}&min_defense=${defenseMin}&max_defense=${defenseMax}&min_special_attack=${specialAttackMin}&max_special_attack=${specialAttackMax}&min_special_defense=${specialDefenseMin}&max_special_defense=${specialDefenseMax}&min_speed=${speedMin}&max_speed=${speedMax}&min_generation_id=${generationMin}&max_generation_id=${generationMax}&query=${query}`);
+        const response = await fetch(`/query?min_hp=${hpMin}&max_hp=${hpMax}&min_attack=${attackMin}&max_attack=${attackMax}&min_defense=${defenseMin}&max_defense=${defenseMax}&min_special_attack=${specialAttackMin}&max_special_attack=${specialAttackMax}&min_special_defense=${specialDefenseMin}&max_special_defense=${specialDefenseMax}&min_speed=${speedMin}&max_speed=${speedMax}&min_generation_id=${generationMin}&max_generation_id=${generationMax}&name=${query}`);
         if (response.ok) {
           const results = await response.json();
           renderTable(results);
