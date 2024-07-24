@@ -409,8 +409,8 @@
           },
           body: JSON.stringify(data),
         });
-        if (response.ok) {
-          insertForm.style.display = 'none';
+        if (response.status === 200) {
+          modal.style.display = 'none';
           manualInsertForm.reset();
           updateSearch(searchBar.value, currentPage);
         }
