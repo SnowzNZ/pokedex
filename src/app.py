@@ -274,64 +274,25 @@ def insert():
     pokemon_id = cur.lastrowid
 
     # Insert Pokémon types
-    types = (data["type1"], data["type2"])
-    for type in types:
-        if type and type.strip():
-            cur.execute(
-                """
-                INSERT INTO PokemonType (pokemon_id, type_id)
-                VALUES (?, (SELECT id FROM Type WHERE name = ?))
-                """,
-                (pokemon_id, type),
-            )
+    types = (data["type1"].lower().capitalize(), data["type2"].lower().capitalize())
+    for type_name in types:
+        if type_name and type_name.strip():
+            # Fetch the type ID
+            cur.execute("SELECT id FROM Type WHERE name = ?", (type_name,))
+            type_id = cur.fetchone()
+            if type_id:
+                cur.execute(
+                    """
+                    INSERT INTO PokemonType (pokemon_id, type_id)
+                    VALUES (?, ?)
+                    """,
+                    (pokemon_id, type_id[0]),
+                )
+            else:
+                print(f"Type '{type_name}' not found in Type table.")
 
     db.commit()
     return jsonify({"status": "success"})
-
-
-@app.route("/filter")
-def filter():
-    # List of allowed attributes for filtering
-    allowed_filters = [
-        "hp",
-        "attack",
-        "defense",
-        "special_attack",
-        "special_defense",
-        "speed",
-        "generation_id",
-    ]
-    filters = []
-
-    # Build the WHERE clause based on provided query parameters
-    for attr in allowed_filters:
-        min_val = request.args.get(f"min_{attr}")
-        max_val = request.args.get(f"max_{attr}")
-        if min_val:
-            filters.append(f"{attr} >= {min_val}")
-        if max_val:
-            filters.append(f"{attr} <= {max_val}")
-
-    where_clause = (
-        " AND ".join(filters) if filters else "1=1"
-    )  # Default to true if no filters
-
-    # Execute the query
-    db = get_db()
-    cur = db.cursor()
-    cur.execute(
-        f"""
-        SELECT * FROM Pokemon
-        WHERE {where_clause}
-    """
-    )
-    rows = cur.fetchall()
-
-    # Convert rows to a list of dicts to jsonify
-    columns = [column[0] for column in cur.description]
-    results = [dict(zip(columns, row)) for row in rows]
-
-    return jsonify(results)
 
 
 @app.teardown_appcontext
