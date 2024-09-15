@@ -168,6 +168,7 @@
         <span class="close">&times;</span>
 
         <form id="manualInsertForm">
+          <input type="hidden" id="editId" name="editId" />
           <label for="number">Number:</label>
           <input type="text" id="number" name="number" /><br />
           <label for="name">Name:</label>
@@ -242,6 +243,7 @@
 
       function openEditModal(pokemon) {
         // Fill
+        document.getElementById('editId').value = pokemon.id;
         document.getElementById('number').value = pokemon.pokemon_id;
         document.getElementById('name').value = pokemon.name;
         document.getElementById('form').value = pokemon.form;

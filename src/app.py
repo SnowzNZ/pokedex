@@ -252,28 +252,53 @@ def insert():
     db = get_db()
     cur = db.cursor()
 
-    # Insert new Pokémon
-    cur.execute(
-        """
-        INSERT INTO Pokemon (pokemon_id, name, form, hp, attack, defense, special_attack, special_defense, speed, generation_id)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """,
-        (
-            data["number"],
-            data["name"],
-            data["form"],
-            data["hp"],
-            data["attack"],
-            data["defense"],
-            data["special_attack"],
-            data["special_defense"],
-            data["speed"],
-            data["generation"],
-        ),
-    )
-    pokemon_id = cur.lastrowid
+    edit_id = data.get("editId")  # Get the edit ID from the incoming data
 
-    # Insert Pokémon types
+    if edit_id:  # If editId is present, perform an update
+        # Update existing Pokémon
+        cur.execute(
+            """
+            UPDATE Pokemon
+            SET pokemon_id = ?, name = ?, form = ?, hp = ?, attack = ?, defense = ?, special_attack = ?, special_defense = ?, speed = ?, generation_id = ?
+            WHERE id = ?
+            """,
+            (
+                data["number"],
+                data["name"],
+                data["form"],
+                data["hp"],
+                data["attack"],
+                data["defense"],
+                data["special_attack"],
+                data["special_defense"],
+                data["speed"],
+                data["generation"],
+                edit_id,  # Include the edit ID to specify which Pokémon to update
+            ),
+        )
+    else:  # If no editId, perform an insert
+        # Insert new Pokémon
+        cur.execute(
+            """
+            INSERT INTO Pokemon (pokemon_id, name, form, hp, attack, defense, special_attack, special_defense, speed, generation_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                data["number"],
+                data["name"],
+                data["form"],
+                data["hp"],
+                data["attack"],
+                data["defense"],
+                data["special_attack"],
+                data["special_defense"],
+                data["speed"],
+                data["generation"],
+            ),
+        )
+        pokemon_id = cur.lastrowid  # Get the ID of the newly inserted Pokémon
+
+    # Insert or update Pokémon types
     types = (data["type1"].lower().capitalize(), data["type2"].lower().capitalize())
     for type_name in types:
         if type_name and type_name.strip():
@@ -281,13 +306,21 @@ def insert():
             cur.execute("SELECT id FROM Type WHERE name = ?", (type_name,))
             type_id = cur.fetchone()
             if type_id:
+                # Check if the type already exists for this Pokémon
                 cur.execute(
-                    """
-                    INSERT INTO PokemonType (pokemon_id, type_id)
-                    VALUES (?, ?)
-                    """,
-                    (pokemon_id, type_id[0]),
+                    "SELECT id FROM PokemonType WHERE pokemon_id = ? AND type_id = ?",
+                    (edit_id if edit_id else pokemon_id, type_id[0]),
                 )
+                existing_type = cur.fetchone()
+
+                if not existing_type:  # If the type doesn't exist, insert it
+                    cur.execute(
+                        """
+                        INSERT INTO PokemonType (pokemon_id, type_id)
+                        VALUES (?, ?)
+                        """,
+                        (edit_id if edit_id else pokemon_id, type_id[0]),
+                    )
             else:
                 print(f"Type '{type_name}' not found in Type table.")
 
