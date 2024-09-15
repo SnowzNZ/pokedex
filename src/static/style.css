@@ -1,112 +1,100 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
 
 html {
-    font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
 }
 
 table {
-    border-collapse: collapse;
-    margin: auto;
-    width: 80%;
+  border-collapse: collapse;
+  margin: auto;
+  width: 80%;
 }
 
 table,
 th,
 td {
-    border: 1px solid black;
-    padding: 10px;
+  border: 1px solid black;
+  padding: 10px;
 }
 
 th,
 td {
-    text-align: center;
+  text-align: center;
 }
 
 input[type="submit"] {
-    background-color: rgb(17, 177, 54)  ;
-    color: white;
-    padding: 14px 16px;
-    margin: 8px 0;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
+  background-color: rgb(17, 177, 54);
+  color: white;
+  padding: 14px 16px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
 }
 
 input[type="file"] {
-    background-color: rgb(0, 110, 255);
-    color: white;
-    padding: 11px 16px;
-    border: none;
-    border-radius: 10px;
+  background-color: rgb(0, 110, 255);
+  color: white;
+  padding: 11px 16px;
+  border: none;
+  border-radius: 10px;
 }
 
-/* The Modal (background) */
 .modal {
-    display: none;
-    /* Hidden by default */
-    position: fixed;
-    /* Stay in place */
-    z-index: 1;
-    /* Sit on top */
-    padding-top: 100px;
-    /* Location of the box */
-    left: 0;
-    top: 0;
-    width: 100%;
-    /* Full width */
-    height: 100%;
-    /* Full height */
-    overflow: auto;
-    /* Enable scroll if needed */
-    background-color: rgb(0, 0, 0);
-    /* Fallback color */
-    background-color: rgba(0, 0, 0, 0.4);
-    /* Black w/ opacity */
+  display: none;
+  position: fixed;
+  z-index: 1;
+  padding-top: 100px;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgb(0, 0, 0);
+  background-color: rgba(0, 0, 0, 0.4);
 }
 
-/* Modal Content */
 .modal-content {
-    background-color: #fefefe;
-    margin: auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%;
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
 }
 
-/* The Close Button */
 .close {
-    color: #aaaaaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
+  color: #aaaaaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
 }
 
 .close:hover,
 .close:focus {
-    color: #000;
-    text-decoration: none;
-    cursor: pointer;
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
 }
 
 .filters {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 
 .filter-group {
-    margin-bottom: 10px;
+  margin-bottom: 10px;
 }
 
 .filter-group label {
-    display: inline-block;
-    width: 150px;
+  display: inline-block;
+  width: 150px;
 }
 
 .filter-group input[type="number"] {
-    width: 60px;
-    margin: 0 5px;
+  width: 60px;
+  margin: 0 5px;
 }
 
 .filter-group span {
-    margin: 0 5px;
+  margin: 0 5px;
 }
